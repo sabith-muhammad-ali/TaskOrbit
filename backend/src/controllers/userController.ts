@@ -42,7 +42,6 @@ const registerUser = AsyncHandler(async (req: Request, res: Response) => {
   });
 
   const otp = crypto.randomInt(100000, 999999).toString();
-
   const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
 
   const newOtp = new Otp({
@@ -101,6 +100,38 @@ const verifyOtp = AsyncHandler(async (req: Request, res: Response) => {
   res.status(200).json({ message: "OTP verified successfully" });
 });
 
+const resendOtp = AsyncHandler(async (req: Request, res: Response) => {
+  const { email } = req.body;
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    res.status(400);
+    throw new Error("User not found");
+  }
+
+  if (user.isVerified) {
+    res.status(400);
+    throw new Error("User is already verified");
+  }
+
+  await Otp.deleteMany({ userId: user._id });
+
+  const otp = crypto.randomInt(100000, 999999).toString();
+  const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+
+  const newOtp = new Otp({
+    userId: user._id,
+    otp,
+    expiresAt,
+  });
+
+  await newOtp.save();
+
+  await sendOtp(email, otp);
+
+  res.status(200).json({ message: "OTP resent successfully" });
+});
+
 const logoutUser = AsyncHandler(async (req: Request, res: Response) => {
   res.cookie("jwt", "", {
     httpOnly: true,
@@ -147,6 +178,7 @@ export {
   authUser,
   registerUser,
   verifyOtp,
+  resendOtp,
   getUserProfile,
   updateUserProfile,
   logoutUser,
