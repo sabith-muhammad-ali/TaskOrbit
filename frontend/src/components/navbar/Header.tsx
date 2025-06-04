@@ -21,7 +21,7 @@ const Header = () => {
         </div>
 
         <div>
-          {userInfo ? (
+          {userInfo.isVerified? (
             <>
               <UserDropdownMenu title={userInfo.name} />
             </>

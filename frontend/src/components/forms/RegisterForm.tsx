@@ -24,7 +24,11 @@ const RegisterForm = () => {
 
   useEffect(() => {
     if (userInfo) {
-      navigate("/");
+      if (!userInfo.isVerified) {
+        navigate("/verify-email");
+      } else {
+        navigate("/");
+      }
     }
   }, [navigate, userInfo]);
 
@@ -35,9 +39,9 @@ const RegisterForm = () => {
     } else {
       try {
         const res = await register({ name, email, password }).unwrap();
-        dispatch(setCredentials({ ...res }));
-        navigate("/");
-      } catch (err : any) {
+        dispatch(setCredentials({ ...res, isVerified: false }));
+        navigate("/verify-email");
+      } catch (err: any) {
         toast.error(err?.data?.message || err.error);
       }
     }
@@ -105,7 +109,7 @@ const RegisterForm = () => {
           />
         </div>
 
-        <Button type="submit" className="w-full">
+        <Button type="submit" className="w-full cursor-pointer">
           Register
         </Button>
 
@@ -117,7 +121,7 @@ const RegisterForm = () => {
             Or continue with
           </div>
         </div>
-      
+
         <Button variant="outline" className="w-full flex gap-2 items-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"

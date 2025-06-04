@@ -9,7 +9,8 @@ type UserType = Document & {
   name: string;
   email: string;
   password: string;
-  _id: string;
+  isVerified:boolean;
+  _id: mongoose.Types.ObjectId;
 } & UserMethods;
 
 const userSchema: Schema<UserType> = new Schema(
@@ -26,6 +27,10 @@ const userSchema: Schema<UserType> = new Schema(
     password: {
       type: String,
       required: true,
+    },
+    isVerified: {
+      type: Boolean,
+      default: false,
     },
   },
   {

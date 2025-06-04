@@ -2,6 +2,9 @@ import AsyncHandler from "express-async-handler";
 import generateToken from "../utils/generateToken";
 import { Request, Response } from "express";
 import User from "../model/userModel";
+import Otp from "../model/otpModel";
+import crypto from "crypto";
+import sendOtp from "../utils/sendMail";
 
 const authUser = AsyncHandler(async (req: Request, res: Response) => {
   const { email, password } = req.body;
@@ -35,22 +38,67 @@ const registerUser = AsyncHandler(async (req: Request, res: Response) => {
     name,
     email,
     password,
-    
+    isVerified: false,
   });
 
-  /// genrate otp for conformation
+  const otp = crypto.randomInt(100000, 999999).toString();
+
+  const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+
+  const newOtp = new Otp({
+    userId: user._id,
+    otp,
+    expiresAt,
+  });
+
+  await newOtp.save();
+
+  await sendOtp(email, otp);
 
   if (user) {
-    generateToken(res, user._id.toString());
     res.status(201).json({
       _id: user._id,
       name: user.name,
       email: user.email,
+      isVerified: user.isVerified,
     });
   } else {
     res.status(400);
     throw new Error("Invalid user data");
   }
+});
+
+const verifyOtp = AsyncHandler(async (req: Request, res: Response) => {
+  console.log("req.body:", req.body);
+  const { email, otp } = req.body;
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    res.status(400);
+    throw new Error("User not found");
+  }
+
+  const otpDoc = await Otp.findOne({ userId: user._id });
+  console.log(otpDoc);
+
+  if (!otpDoc) {
+    res.status(400);
+    throw new Error("OTP not found");
+  }
+
+  const isExpired = otpDoc.expiresAt.getTime() < Date.now();
+  if (otpDoc.otp !== otp || isExpired) {
+    res.status(400);
+    throw new Error("Invalid or expired OTP");
+  }
+
+  user.isVerified = true;
+  await user.save();
+
+  await Otp.deleteMany({ userId: user._id });
+
+  generateToken(res, user._id.toString());
+  res.status(200).json({ message: "OTP verified successfully" });
 });
 
 const logoutUser = AsyncHandler(async (req: Request, res: Response) => {
@@ -98,7 +146,8 @@ const updateUserProfile = AsyncHandler(async (req: Request, res: Response) => {
 export {
   authUser,
   registerUser,
-  logoutUser,
+  verifyOtp,
   getUserProfile,
   updateUserProfile,
+  logoutUser,
 };

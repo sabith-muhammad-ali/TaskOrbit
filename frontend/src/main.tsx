@@ -15,6 +15,7 @@ import LandingPage from "./components/screens/LandingPage.tsx";
 import LoginPage from "./components/screens/LoginPage.tsx";
 import RegisterPage from "./components/screens/RegisterPage.tsx";
 import ProfilePage from "./components/screens/ProfilePage.tsx";
+import OtpPage from "./components/screens/OtpPage.tsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -22,6 +23,7 @@ const router = createBrowserRouter(
       <Route index={true} path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/verify-email" element={<OtpPage />} />
       <Route path="" element={<PrivateRoute />}>
         <Route path="/profile" element={<ProfilePage />} />
       </Route>
