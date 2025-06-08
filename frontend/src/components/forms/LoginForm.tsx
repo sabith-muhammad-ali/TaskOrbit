@@ -9,11 +9,15 @@ import { setCredentials } from "@/slices/authSlice";
 import { toast } from "react-toastify";
 import type { RootState } from "../../store";
 import Loader from "../Loader";
-import  GoogleAuth  from "./GoogleAuth";
+import GoogleAuth from "./GoogleAuth";
 
 const LoginForm = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [formErrors, setFormErrors] = useState<{
+    email?: string;
+    password?: string;
+  }>({});
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -28,8 +32,34 @@ const LoginForm = () => {
     }
   }, [navigate, userInfo]);
 
+  const validateForm = () => {
+    const errors: { email?: string; password?: string } = {};
+
+    if (!email.trim()) {
+      errors.email = "Email is required";
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      errors.email = "Email is invalid";
+    }
+
+    if (!password) {
+      errors.password = "Password is required";
+    } else if (password.length < 8) {
+      errors.password = "Password must be at least 8 characters";
+    } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+      errors.password = "Password must contain at least one special character";
+    }
+
+    setFormErrors(errors);
+
+    
+    return Object.keys(errors).length === 0;
+  };
+
   const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (!validateForm()) return;
+
     try {
       const res = await login({ email, password }).unwrap();
       dispatch(setCredentials({ ...res }));
@@ -61,6 +91,9 @@ const LoginForm = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
+          {formErrors.email && (
+            <p className="text-red-500 text-sm mt-1">{formErrors.email}</p>
+          )}
         </div>
 
         <div className="grid gap-2">
@@ -77,6 +110,9 @@ const LoginForm = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
+          {formErrors.password && (
+            <p className="text-red-500 text-sm mt-1">{formErrors.password}</p>
+          )}
         </div>
 
         {isLoading && <Loader />}

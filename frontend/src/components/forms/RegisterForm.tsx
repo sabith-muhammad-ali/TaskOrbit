@@ -16,6 +16,13 @@ const RegisterForm = () => {
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [password, setPassword] = useState<string>("");
 
+  const [formErrors, setFormErrors] = useState<{
+    name?: string;
+    email?: string;
+    password?: string;
+    confirmPassword?: string;
+  }>({});
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -33,18 +40,56 @@ const RegisterForm = () => {
     }
   }, [navigate, userInfo]);
 
+  const validateForm = () => {
+    const errors: {
+      name?: string;
+      email?: string;
+      password?: string;
+      confirmPassword?: string;
+    } = {};
+
+    if (!name.trim()) {
+      errors.name = "Name is required";
+    }
+
+    if (!email.trim()) {
+      errors.email = "Email is required";
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      errors.email = "Email is invalid";
+    }
+
+    if (!password) {
+      errors.password = "Password is required";
+    } else if (password.length < 8) {
+      errors.password = "Password must be at least 8 characters";
+    } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+      errors.password = "Password must contain at least one special character";
+    }
+
+    if (!confirmPassword) {
+      errors.confirmPassword = "Confirm Password is required";
+    } else if (password !== confirmPassword) {
+      errors.confirmPassword = "Passwords do not match";
+    }
+
+    setFormErrors(errors);
+
+    return Object.keys(errors).length === 0;
+  };
+
   const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (password !== confirmPassword) {
-      toast.error("password do not match");
-    } else {
-      try {
-        const res = await register({ name, email, password }).unwrap();
-        dispatch(setCredentials({ ...res, isVerified: false }));
-        navigate("/verify-email");
-      } catch (err: any) {
-        toast.error(err?.data?.message || err.error);
-      }
+
+    if (!validateForm()) {
+      return;
+    }
+
+    try {
+      const res = await register({ name, email, password }).unwrap();
+      dispatch(setCredentials({ ...res, isVerified: false }));
+      navigate("/verify-email");
+    } catch (err: any) {
+      toast.error(err?.data?.message || err.error);
     }
   };
 
@@ -59,7 +104,7 @@ const RegisterForm = () => {
 
       <div className="grid gap-5">
         <div className="grid gap-2">
-          <Label htmlFor="email">Name</Label>
+          <Label htmlFor="name">Name</Label>
           <Input
             id="name"
             type="text"
@@ -67,6 +112,9 @@ const RegisterForm = () => {
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
+          {formErrors.name && (
+            <p className="text-red-500 text-sm">{formErrors.name}</p>
+          )}
         </div>
 
         <div className="grid gap-2">
@@ -78,26 +126,13 @@ const RegisterForm = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
+          {formErrors.email && (
+            <p className="text-red-500 text-sm">{formErrors.email}</p>
+          )}
         </div>
 
         <div className="grid gap-2">
-          <Label htmlFor="password">Confirm Password</Label>
-          <Input
-            id="ConfirmPassword"
-            type="password"
-            placeholder="Enter Password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-          />
-        </div>
-
-        <div className="grid gap-2">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="password">Password</Label>
-            <a href="#" className="text-sm text-blue-600 hover:underline">
-              Forgot password?
-            </a>
-          </div>
+          <Label htmlFor="password">Password</Label>
           <Input
             id="password"
             type="password"
@@ -105,6 +140,23 @@ const RegisterForm = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
+          {formErrors.password && (
+            <p className="text-red-500 text-sm">{formErrors.password}</p>
+          )}
+        </div>
+
+        <div className="grid gap-2">
+          <Label htmlFor="confirmPassword">Confirm Password</Label>
+          <Input
+            id="confirmPassword"
+            type="password"
+            placeholder="Confirm Password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+          />
+          {formErrors.confirmPassword && (
+            <p className="text-red-500 text-sm">{formErrors.confirmPassword}</p>
+          )}
         </div>
 
         <Button type="submit" className="w-full cursor-pointer">
