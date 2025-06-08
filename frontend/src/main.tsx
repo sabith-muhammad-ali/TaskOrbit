@@ -1,5 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 import "./index.css";
 import {
   createBrowserRouter,
@@ -16,6 +17,7 @@ import LoginPage from "./components/screens/LoginPage.tsx";
 import RegisterPage from "./components/screens/RegisterPage.tsx";
 import ProfilePage from "./components/screens/ProfilePage.tsx";
 import OtpPage from "./components/screens/OtpPage.tsx";
+const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -34,7 +36,9 @@ const router = createBrowserRouter(
 createRoot(document.getElementById("root")!).render(
   <Provider store={store}>
     <StrictMode>
-      <RouterProvider router={router} />
+      <GoogleOAuthProvider clientId={clientId}>
+        <RouterProvider router={router} />
+      </GoogleOAuthProvider>
     </StrictMode>
   </Provider>
 );
