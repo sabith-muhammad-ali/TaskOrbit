@@ -11,6 +11,7 @@ type UserType = Document & {
   password: string;
   isVerified: boolean;
   isGoogleUser:boolean;
+  image:string;
   _id: mongoose.Types.ObjectId;
 } & UserMethods;
 
@@ -36,6 +37,11 @@ const userSchema: Schema<UserType> = new Schema(
     isGoogleUser: {
       type: Boolean,
       default: false,
+    },
+    image:{
+      type:String,
+      required:false,
+      default: "profile.jpeg"
     },
   },
   {

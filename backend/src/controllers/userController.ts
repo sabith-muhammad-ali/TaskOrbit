@@ -17,7 +17,8 @@ const authUser = AsyncHandler(async (req: Request, res: Response) => {
       _id: user._id,
       name: user.name,
       email: user.email,
-      isVerified:user.isVerified
+      isVerified: user.isVerified,
+      image: user.image,
     });
   } else {
     res.status(400);
@@ -35,11 +36,14 @@ const registerUser = AsyncHandler(async (req: Request, res: Response) => {
     throw new Error("User already exists");
   }
 
+  const image = req.file ? req.file.filename : "profile.jpeg";
+
   const user = await User.create({
     name,
     email,
     password,
     isVerified: false,
+    image,
   });
 
   const otp = crypto.randomInt(100000, 999999).toString();
@@ -61,6 +65,7 @@ const registerUser = AsyncHandler(async (req: Request, res: Response) => {
       name: user.name,
       email: user.email,
       isVerified: user.isVerified,
+      image: user.image,
     });
   } else {
     res.status(400);
@@ -69,7 +74,6 @@ const registerUser = AsyncHandler(async (req: Request, res: Response) => {
 });
 
 const verifyOtp = AsyncHandler(async (req: Request, res: Response) => {
-  console.log("req.body:", req.body);
   const { email, otp } = req.body;
 
   const user = await User.findOne({ email });
@@ -79,7 +83,6 @@ const verifyOtp = AsyncHandler(async (req: Request, res: Response) => {
   }
 
   const otpDoc = await Otp.findOne({ userId: user._id });
-  console.log(otpDoc);
 
   if (!otpDoc) {
     res.status(400);
@@ -147,6 +150,7 @@ const getUserProfile = AsyncHandler(async (req: Request, res: Response) => {
     _id: (req as any).user._id as string,
     name: (req as any).user.name as string,
     email: (req as any).user.email as string,
+    image: (req as any).user.image as string,
   };
   res.status(200).json(user);
 });
@@ -159,15 +163,17 @@ const updateUserProfile = AsyncHandler(async (req: Request, res: Response) => {
     user.name = req.body.name || user.name;
     user.email = req.body.email || user.email;
 
-    if (req.body.password) {
-      user.password = req.body.password;
+    if (req.file) {
+      user.image = req.file.filename;
     }
+
     const updatedUser = await user.save();
 
     res.status(200).json({
       _id: updatedUser._id,
       name: updatedUser.name,
       email: updatedUser.email,
+      image: updatedUser.image,
     });
   } else {
     res.status(404);

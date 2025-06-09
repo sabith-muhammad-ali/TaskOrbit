@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,10 +18,10 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 type UserDropdownMenuProps = {
-  title: string;
+  imageUrl: string;
 };
 
-const UserDropdownMenu = ({ title }: UserDropdownMenuProps) => {
+const UserDropdownMenu = ({ imageUrl }: UserDropdownMenuProps) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [logoutApiCall] = useLogoutMutation();
@@ -39,14 +38,16 @@ const UserDropdownMenu = ({ title }: UserDropdownMenuProps) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="cursor-pointer">
-          {title}
-        </Button>
+        <img
+          src={imageUrl}
+          alt="Profile"
+          className="w-8 h-8 rounded-full object-cover cursor-pointer "
+        />
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="start">
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuGroup>
-          <DropdownMenuItem onClick={() => navigate('/profile')}>
+          <DropdownMenuItem onClick={() => navigate("/profile")}>
             Profile
             <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
           </DropdownMenuItem>

@@ -20,10 +20,10 @@ const Header = () => {
           </Link>
         </div>
 
-        <div>
-          {userInfo? (
+        <div >
+          {userInfo ? (
             <>
-              <UserDropdownMenu title={userInfo.name} />
+              <UserDropdownMenu   imageUrl={`http://localhost:8000/uploads/${userInfo.image}` } />
             </>
           ) : (
             <>
