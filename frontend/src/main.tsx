@@ -17,6 +17,7 @@ import LoginPage from "./components/screens/LoginPage.tsx";
 import RegisterPage from "./components/screens/RegisterPage.tsx";
 import ProfilePage from "./components/screens/ProfilePage.tsx";
 import OtpPage from "./components/screens/OtpPage.tsx";
+import HomePage from "./dashboard/HomePage.tsx";
 const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 const router = createBrowserRouter(
@@ -27,6 +28,7 @@ const router = createBrowserRouter(
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/verify-email" element={<OtpPage />} />
       <Route path="" element={<PrivateRoute />}>
+      <Route path="/home" element={<HomePage />} />
         <Route path="/profile" element={<ProfilePage />} />
       </Route>
     </Route>
